@@ -1,0 +1,193 @@
+<apex:page controller="CreateField" lightningStylesheets="true" sidebar="false">
+    <apex:slds >
+        <apex:sectionHeader title="Custom Field" subtitle="New Custom Field" />
+        
+        
+        <apex:form id="mainform">
+            <center>
+                <apex:messages styleClass="slds-text-color_inverse slds-text-heading_small slds-theme_error" style="width:25%"></apex:messages>
+            </center>
+            <!-- <apex:pageMessages ></apex:pageMessages> -->
+            <apex:actionStatus id="status">
+                <apex:facet name="start">
+                    <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; opacity: 0.75; z-index: 1000; background-color: black;">
+                        &nbsp;
+                    </div>
+                    <div style="position: fixed; left: 0; top: 0; bottom: 0; right: 0; z-index: 1001; margin: 30% 50%">
+                        <img src="http://upload.wikimedia.org/wikipedia/commons/e/ed/Cursor_Windows_Vista.gif" />
+                    </div> 
+                </apex:facet>
+            </apex:actionStatus>
+            <apex:pageBlock title="Create Custom Field"   id="VfPage" mode="Edit" rendered="{!ShowMainForm}">
+                <apex:pageBlockButtons >
+                    <apex:commandButton value="Next" action="{!showConfirmationWindow}" reRender="mainform,ConfirmationWindow" status="status" />                
+                </apex:pageBlockButtons>
+                <apex:pageBlockSection title="Type Select" collapsible="false" columns="1" > 
+                    <apex:pageBlockSectionItem >
+                        <label class="slds-form-element__label" for="form-element-05">Select Field Type<abbr class="slds-required " title="required">* </abbr></label>
+                        <apex:selectList label="" multiselect="false" size="1" value="{!FieldType}"  id="FieldTypePicklist"  styleClass="slds-select" style="width:40%">
+                            <apex:selectoption itemLabel="--Select--" itemValue="--Select--"></apex:selectoption>
+                            <apex:selectoption itemLabel="Number" itemValue="Number"></apex:selectoption>
+                            <apex:selectoption itemLabel="Checkbox" itemValue="Checkbox"></apex:selectoption>
+                            <apex:selectoption itemLabel="Percent" itemValue="Percent"></apex:selectoption>                
+                            <apex:selectoption itemLabel="Text" itemValue="Text"></apex:selectoption>
+                            <apex:selectoption itemLabel="Date" itemValue="Date"></apex:selectoption>
+                            <apex:actionSupport event="onchange" action="{!reSetAllValues}" rerender="VfPage"  /> 
+                        </apex:selectList>
+                    </apex:pageBlockSectionItem>
+                </apex:pageBlockSection>
+                <apex:pageBlockSection title="Select Object Type" columns="2" >
+                    <apex:pageBlockSectionItem >
+                        <label class="slds-form-element__label" for="form-element-05">Object Type<abbr class="slds-required " title="required">* </abbr></label>
+                        <apex:selectList label="" multiselect="false" size="1" value="{!strObjType}"  id="ObjTypePicklist"  styleClass="slds-select" style="width:40%">
+                            <apex:selectoption itemLabel="--Select--" itemValue="--Select--"></apex:selectoption>
+                            <apex:selectoption itemLabel="Product Attribute Value Objects" itemValue="PAVObjects"></apex:selectoption>
+                            <apex:selectoption itemLabel="Line Item Objects" itemValue="LIObjects"></apex:selectoption>
+                            <apex:actionSupport event="onchange" action="{!selectedObjType}" rerender="ObjNames"  />
+                        </apex:selectList>
+                    </apex:pageBlockSectionItem>
+                    
+                    
+                    
+                    <apex:pageBlockSectionItem >
+                        <label class="slds-form-element__label" for="form-element-05">Object Names <abbr class="slds-required " title="required">* </abbr></label>
+                        <apex:selectList label="" multiselect="false" readonly="true" size="4" value="{!ListOfObjects}"  id="ObjNames"  styleClass="slds-select" style="width:40%" disabled="true">
+                            <apex:selectoptions value="{!ObjectNames}"></apex:selectoptions>
+                            
+                        </apex:selectList>
+                    </apex:pageBlockSectionItem> 
+                    
+                </apex:pageBlockSection>
+                
+                <apex:pageBlockSection title="Field Parameters" columns="2" >
+                    <apex:pageBlockSectionItem >
+                        <label class="slds-form-element__label" for="form-element-05">Field Label<abbr class="slds-required " title="required">* </abbr></label>
+                        <apex:inputText label="" id="FieldLabel" value="{!FieldLabel}" styleClass="slds-input">
+                            <!--<apex:actionSupport event="onchange"  action="{!UpdateAPIName}" /> -->
+                            <apex:actionSupport event="onchange" action="{!UpdateAPIName}" rerender="FieldAPIName" />   
+                        </apex:inputText>
+                    </apex:pageBlockSectionItem>
+                    
+                    <apex:pageBlockSectionItem >
+                        <label class="slds-form-element__label" for="form-element-05">Field Name<abbr class="slds-required " title="required">* </abbr></label>
+                        <apex:inputText label="" id="FieldAPIName" value="{!FieldAPIName}" styleClass="slds-input"/>
+                    </apex:pageBlockSectionItem>
+                    
+                    <apex:pageBlockSectionItem >
+                        <label class="slds-form-element__label" for="form-element-05">Field Description</label>
+                        <apex:inputText label="" id="fieldDescription" value="{!fieldDescription}" styleClass="slds-input"/>
+                    </apex:pageBlockSectionItem>
+                    
+                    <apex:pageBlockSectionItem >
+                        <label class="slds-form-element__label" for="form-element-05">Help Text</label>
+                        <apex:inputText label="" id="FieldHelpText" value="{!FieldHelpText}" styleClass="slds-input"/>
+                    </apex:pageBlockSectionItem>   
+                    
+                    
+                    <apex:pageBlockSectionItem rendered="{!If(FieldType='Number' || FieldType='Percent' ,true,false)}">
+                        <label class="slds-form-element__label" for="form-element-05">Length<abbr class="slds-required " title="required">* </abbr></label>
+                        <apex:inputText label="" id="FieldScale" value="{!FieldScale}" rendered="{!If(FieldType='Number' || FieldType='Percent' ,true,false)}" styleClass="slds-input"/> 
+                    </apex:pageBlockSectionItem>
+                    
+                    
+                    <apex:pageBlockSectionItem rendered="{!If(FieldType='Number' || FieldType='Percent' ,true,false)}">
+                        <label class="slds-form-element__label" for="form-element-05">Decimal Places <abbr class="slds-required " title="required">* </abbr></label>
+                        <apex:inputText label="" id="FieldPrecision" value="{!FieldPrecision}" rendered="{!If(FieldType='Number' || FieldType='Percent' ,true,false)}" styleClass="slds-input"/>
+                    </apex:pageBlockSectionItem>
+                    
+                    
+                    <apex:pageBlockSectionItem rendered="{!If(FieldType='Checkbox',true,false)}">
+                        <label class="slds-form-element__label" for="form-element-05">Default Value</label>
+                        <apex:inputCheckbox label="" value="{!bDefaultValue}" rendered="{!If(FieldType='Checkbox',true,false)}" styleClass="slds-input"> 
+                        </apex:inputCheckbox>
+                    </apex:pageBlockSectionItem>
+                    
+                    <apex:pageBlockSectionItem rendered="{!If(FieldType='Text',true,false)}" >
+                        <label class="slds-form-element__label" for="form-element-05">Length<abbr class="slds-required " title="required">* </abbr></label>
+                        <apex:inputText label="" id="FieldLength" value="{!FieldLength}" rendered="{!If(FieldType='Text',true,false)}" styleClass="slds-input"/> 
+                    </apex:pageBlockSectionItem>
+                </apex:pageBlockSection>           
+            </apex:pageBlock>
+            
+            
+            <!-- Confirmation Window Page -->
+            <apex:pageBlock title="Confirmation Window" id="ConfirmationWindow" rendered="{!showConfirmationWindow}">
+                <apex:pageBlockButtons >
+                    <apex:commandButton value="Save" action="{!saveField}" reRender="mainform,ConfirmationWindow" status="status"/> 
+                    <apex:commandButton value="Back" action="{!showMainForm}" reRender="mainform,ConfirmationWindow,VfPage2" status="status"/> 
+                </apex:pageBlockButtons>
+                
+                <apex:pageBlockSection >
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="Field Label"/>
+                        <apex:outputText label="" value="{!FieldLabel}" id="FieldLabel" />
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="Field API Name"/>
+                        <apex:outputText label="" value="{!FieldAPIName}" id="FieldAPIName" />
+                    </apex:pageBlockSectionItem>
+                    
+                    <apex:pageBlockSectionItem rendered="{!If(FieldType='Number' || FieldType='Percent' ,true,false)}">
+                        <apex:outputLabel value="Length"/>
+                        <apex:outputText label="" value="{!FieldScale}" id="FieldScale" />
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem rendered="{!If(FieldType='Number' || FieldType='Percent' ,true,false)}">
+                        <apex:outputLabel value="Decimal Place"/>
+                        <apex:outputText label="" value="{!FieldPrecision}" id="FieldPrecision"/>
+                    </apex:pageBlockSectionItem>
+                    
+                    <apex:pageBlockSectionItem rendered="{!If(FieldType='Text',true,false)}">
+                        <apex:outputLabel value="Field Length"/>
+                        <apex:outputText label="" value="{!FieldLength}"  id="FieldLength"/>
+                    </apex:pageBlockSectionItem>
+                    
+                </apex:pageBlockSection>
+                
+                
+            </apex:pageBlock> 
+            <apex:pageBlock title="Created Fields"   id="VfPage2" mode="Edit" rendered="{!ShowSubForm}">
+                <apex:pageBlockButtons >
+                    <apex:commandButton value="Ok" action="{!reDirectToMainPage}"/>  
+                    
+                </apex:pageBlockButtons>
+                <apex:pageBlockSection title="Fields Created Successfully " collapsible="false" columns="1" rendered="{!ShowSuccessFieldsDetails}">              
+                    <!-- Pagination start  for Success-->
+                    <apex:outputPanel id="myButtonsS" styleClass="slds-align_absolute-center">
+                        <apex:commandButton action="{!BeginningS}" title="Beginning" value="<<" disabled="{!disablePreviousS}" reRender="myPanelS,myButtonsS"/>
+                        <apex:commandButton action="{!PreviousS}" title="Previous" value="<" disabled="{!disablePreviousS}" reRender="myPanelS,myButtonsS"/>        
+                        <apex:commandButton action="{!NextS}" title="Next" value=">" disabled="{!DisableNextS}" reRender="myPanelS,myButtonsS"/>
+                        <apex:commandButton action="{!EndS}" title="End" value=">>" disabled="{!disableNextS}" reRender="myPanelS,myButtonsS"/>        
+                    </apex:outputPanel>
+                    <br/>
+                    <!-- Pagination End for Success-->
+                    <apex:outputPanel id="myPanelS" styleClass="slds-align_absolute-center">
+                        <apex:pageBlockTable value="{!SuccessFieldsObjName}" var="ObjName">
+                            <apex:column value="{!ObjName}" headerValue="Object Name" />
+                            <apex:facet name="footer">Showing Page # {!pageNumber} of {!totalPages}</apex:facet> 
+                        </apex:pageBlockTable>
+                    </apex:outputPanel>
+                </apex:pageBlockSection>
+                
+                <apex:pageBlockSection title="Fields not Created Successfully " collapsible="false" columns="1" rendered="{!ShowFailedFieldsDetails}">                    
+                    <!--  Pagination start  for Failures -->
+                    <apex:outputPanel id="myButtons" styleClass="slds-align_absolute-center slds-p-right_xx-large">
+                        <apex:commandButton action="{!Beginning}" title="Beginning" value="<<" disabled="{!disablePrevious}" reRender="myPanel,myButtons"/>
+                        <apex:commandButton action="{!Previous}" title="Previous" value="<" disabled="{!disablePrevious}" reRender="myPanel,myButtons"/>        
+                        <apex:commandButton action="{!Next}" title="Next" value=">" disabled="{!disableNext}" reRender="myPanel,myButtons"/>
+                        <apex:commandButton action="{!End}" title="End" value=">>" disabled="{!disableNext}" reRender="myPanel,myButtons"/>        
+                    </apex:outputPanel>
+                    <!-- Pagination End for Failures  -->
+                    <apex:slds >
+                        <apex:outputPanel id="myPanel" styleClass="slds-align_absolute-center slds-p-right_xx-large">
+                            <apex:pageBlockTable value="{!failedFieldsObjName}" var="rec">
+                                <apex:column value="{!rec}" headerValue="Object Name" />
+                                <apex:column value="{!failedFieldsObjName[rec]}" headerValue="Error Message" />
+                                <apex:facet name="footer">Showing Page # {!pageNumber} of {!totalPages}</apex:facet>
+                            </apex:pageBlockTable>  
+                        </apex:outputPanel>
+                    </apex:slds>         
+                </apex:pageBlockSection>
+            </apex:pageBlock>
+        </apex:form>
+    </apex:slds>
+</apex:page>
