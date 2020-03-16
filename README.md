@@ -1,2 +1,2 @@
 # FieldCreatorApp
-This app will help to create app on multiple objects with same API Name
+This app will help to create custom field on multiple objects with same API Name
